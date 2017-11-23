@@ -1,0 +1,23 @@
+{
+  "name": "contosobankbot",
+  "version": "1.0.0",
+  "description": "MSA Contoso Bank Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kellypitts91/MSA-Contoso-Bank-Ltd.git"
+  },
+  "author": "Kelly Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kellypitts91/MSA-Contoso-Bank-Ltd/issues"
+  },
+  "homepage": "https://github.com/kellypitts91/MSA-Contoso-Bank-Ltd#readme",
+  "dependencies": {
+    "botbuilder": "^3.12.0",
+    "restify": "^6.3.4"
+  }
+}
