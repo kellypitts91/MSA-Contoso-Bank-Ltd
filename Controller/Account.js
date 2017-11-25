@@ -1,10 +1,10 @@
 var rest = require('../API/RestClient');
 var builder = require('botbuilder');
 
-//TODO -- display bank information in a card
+//displays bank information in a card
 exports.displayAccountInfo = function getAccountInfo(accNumber, session){
     var url = 'http://kellycontosobank.azurewebsites.net/tables/Account';
-    rest.getAccountInfo(url, session, accNumber, handleAccountResponse)
+    rest.getAccountInfo(url, session, accNumber, handleAccountResponse);
 };
 
 function handleAccountResponse(message, accNumber, session) {
@@ -54,6 +54,20 @@ function handleAccountResponse(message, accNumber, session) {
         //user not found
         session.send("Sorry, that account number does not exist.");
     }
+}
+
+//not working
+exports.assignAccountNumber = function getAccountInfo(accNumber, session){
+    var url = 'http://kellycontosobank.azurewebsites.net/tables/Account';
+    rest.getAccountInfo(url, session, accNumber, handleLastAccountResponse);
+};
+
+//not working
+function handleLastAccountResponse(message, accNumber, session) {
+    var details = JSON.parse(message);
+    var pos = details.length-1;
+    session.conversationData["accNumber"] = details[pos].accNumber + 1;
+    //console.log(session.conversationData["accNumber"] + " accnumber");
 }
 
 //Sets up a new Account

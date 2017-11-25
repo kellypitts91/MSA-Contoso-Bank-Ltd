@@ -2,7 +2,7 @@ var builder = require('botbuilder');
 var isNumeric = require("isnumeric");
 var account = require("./Account");
 var about = require("./AboutAccounts");
-var acc = "1"; //testing for now
+var acc = 1; //testing for now
 
 exports.startDialog = function(bot) {
 
@@ -72,8 +72,10 @@ exports.startDialog = function(bot) {
             builder.Prompts.confirm(session, msg);
         }, function(session, results) {
             if(results.response) {
-                //insert data into database here
-                session.conversationData["accNumber"] = acc;
+                //come back to this
+                account.assignAccountNumber(session, session.conversationData["accNumber"]);
+                //session.conversationData["accNumber"] = acc;
+                console.log("HERE! " + session.conversationData["accNumber"]);
                 //create key/value pairs with users information
                 var accountInfo = {
                     accNumber: acc,
@@ -85,6 +87,7 @@ exports.startDialog = function(bot) {
                 session.send("Setting up account for " + accountInfo.firstName + " " + accountInfo.lastName);
                 account.sendAccountInfo(session, accountInfo);
                 session.send("Account has been setup successfully. Is there anything else I can help you with?");
+                acc++; //doesn't work - need to get value then increase -- work on later
             } else {
                 //restart
                 session.beginDialog('SetUpAccount');  

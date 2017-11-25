@@ -4,7 +4,7 @@ exports.getAccountInfo = function getData(url, session, accNumber, callback){
     request.get(url, {'headers':{'ZUMO-API-VERSION': '2.0.0'}}, function handleGetReponse(err,res,body){
         if(err){
             console.log(err);
-        }else {
+        } else {
             callback(body, session, accNumber);
         }
     });
@@ -31,3 +31,24 @@ exports.postAccountInfo = function SendData(url, accInfo){
         }
       });
 };
+
+// exports.deleteAccount = function deleteData(url,session, username, id, callback){
+//     var options = {
+//         url: url + "\\" + id,
+//         method: 'DELETE',
+//         headers: {
+//             'ZUMO-API-VERSION': '2.0.0',
+//             'Content-Type':'application/json'
+//         }
+//     };
+
+//     request(options,function (err, res, body){
+//         if( !err && res.statusCode === 200){
+//             console.log(body);
+//             callback(body,session,username, favouriteFood);
+//         }else {
+//             console.log(err);
+//             console.log(res);
+//         }
+//     })
+// };
