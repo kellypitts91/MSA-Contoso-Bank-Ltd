@@ -18,6 +18,7 @@
   "homepage": "https://github.com/kellypitts91/MSA-Contoso-Bank-Ltd#readme",
   "dependencies": {
     "botbuilder": "^3.12.0",
+    "isnumeric": "^0.3.2",
     "restify": "^6.3.4"
   }
 }
