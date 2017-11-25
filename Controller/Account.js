@@ -10,21 +10,17 @@ exports.displayAccountInfo = function getAccountInfo(accNumber, session){
 function handleAccountResponse(message, accNumber, session) {
     //message = tuple in database
     var details = JSON.parse(message);
-    console.log(details);
-    //console.log(message);
     var found = false;
-    var i, pos = 0;
-    console.log("len = " + details.length);
+    var pos = 0;
     //going through all tuples in the database to find the correct account number
-    for(i = 0; i < details.length; i++) {
-        console.log(details[i].accNumber + " " + accNumber);
+    for(var i = 0; i < details.length; i++) {
         if(details[i].accNumber == accNumber) {
             found = true;
             pos = i;
         }
-        console.log(i);
     }
     if(found) {
+        //creates a new adaptive card to display the account information to the user
         session.send(new builder.Message(session).addAttachment({
             contentType: "application/vnd.microsoft.card.adaptive",
             content: {
@@ -37,23 +33,23 @@ function handleAccountResponse(message, accNumber, session) {
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": "Account Information for: "+details[pos].accNumber,
+                                "text": "Account Information for: " + details[pos].accNumber, //displays the users account number
                                 "size": "large"
                             },
                             {
                                 "type": "TextBlock",
-                                "text": "Name: " + details[pos].firstName + " " + details[pos].lastName
+                                "text": "Name: " + details[pos].firstName + " " + details[pos].lastName //displays the users name
                             }, 
                             {
                                 "type": "TextBlock",
-                                "text": "Account Balance: " + details[pos].balance
+                                "text": "Account Balance: " + details[pos].balance //displays the users balance
                             }
                         ]
                     }
                 ]
             }
         }));
-        session.send("Is there anything else I can help you with?");
+        session.send("Is there anything else I can help you with? Type \'Account\' again for more account options.");
     } else {
         //user not found
         session.send("Sorry, that account number does not exist.");

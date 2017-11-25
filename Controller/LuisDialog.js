@@ -1,6 +1,7 @@
 var builder = require('botbuilder');
 var isNumeric = require("isnumeric");
 var account = require("./Account");
+var about = require("./AboutAccounts");
 var acc = "1"; //testing for now
 
 exports.startDialog = function(bot) {
@@ -94,15 +95,14 @@ exports.startDialog = function(bot) {
         confirmPrompt: "This will cancel your setup. Are you sure?"
     });
 
-
     var accountChoice = {
         "Balance": {
-            Description: "Check account balance"
+            Description: "Account balance"
         },
-        "Cheque/Debit": {
+        "Cheque": {
             Description: "Cheque/Debit Account"
         },
-        "Credit Card": {
+        "Credit": {
             Description: "Credit card Account"
         },
         "Savings": {
@@ -121,7 +121,20 @@ exports.startDialog = function(bot) {
             var acc = accountChoice[results.response.entity];
             session.send("Getting information about " + acc.Description);
             session.sendTyping();
-            //session.endDialog();
+            switch(results.response.entity) {
+                case "Balance":
+                    account.displayAccountInfo(session, session.conversationData["accNumber"]);
+                    break;
+                case "Cheque":
+                    about.getChequeInfo(session);
+                    break;
+                case "Credit":
+                    about.getCreditInfo(session);
+                    break;
+                case "Savings":
+                    about.getSavingsInfo(session);
+                    break; 
+            }
         }
     ]);
 }
