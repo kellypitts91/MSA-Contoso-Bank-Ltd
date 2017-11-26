@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/kellypitts91/MSA-Contoso-Bank-Ltd#readme",
   "dependencies": {
+    "@google/maps": "^0.4.5",
     "botbuilder": "^3.12.0",
     "isnumeric": "^0.3.2",
     "restify": "^6.3.4"

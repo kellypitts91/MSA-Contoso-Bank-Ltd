@@ -23,3 +23,16 @@ function validResponse(body){
         console.log('Oops, please try again!');
     }
 }
+
+function isAttachment(session) { 
+    var msg = session.message.text;
+    if ((session.message.attachments && session.message.attachments.length > 0) || msg.includes("http")) {
+        //call custom vision
+        customVision.retreiveMessage(session);
+
+        return true;
+    }
+    else {
+        return false;
+    }
+}
