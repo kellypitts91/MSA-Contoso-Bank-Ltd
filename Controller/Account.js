@@ -2,7 +2,7 @@ var rest = require('../API/RestClient');
 var builder = require('botbuilder');
 
 // exports.getAllAccounts = function getAllAccounts(accNumber, session) {
-//     var url = 'http://kellycontoso.azurewebsites.net/tables/Account';
+//     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
 //     rest.getAccountInfo(url, session, accNumber, handleAllAccountResponse);
 // }
 
@@ -20,12 +20,15 @@ var builder = require('botbuilder');
 // }
 
 //displays bank information in a card
-exports.displayAccountInfo = function getAccountInfo(accNumber, session){
-    var url = 'http://kellycontoso.azurewebsites.net/tables/Account';
-    rest.getAccountInfo(url, session, accNumber, handleAccountResponse);
+exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPassword){
+    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
+    rest.getAccountInfo(url, session, accNumber, accPassword, handleAccountResponse);
 };
 
-function handleAccountResponse(message, accNumber, session) {
+function handleAccountResponse(message, session, accNumber, accPassword) {
+    console.log("num = " + accNumber);
+    console.log("pass = " + accPassword);
+    console.log("session = " + session);
     //message = tuple in database
     var details = JSON.parse(message);
     var found = false;
@@ -33,10 +36,10 @@ function handleAccountResponse(message, accNumber, session) {
     console.log(details);
     //going through all tuples in the database to find the correct account number
     for(var i = 0; i < details.length; i++) {
-        if(details[i].accNumber == accNumber) {
+        if(details[i].accNumber == accNumber && details[i].password == accPassword) {
             found = true;
             pos = i;
-            //break;
+            break;
         }
     }
     if(found) {
@@ -72,13 +75,13 @@ function handleAccountResponse(message, accNumber, session) {
         session.send("Is there anything else I can help you with? Type \'Account\' again for more account options.");
     } else {
         //user not found
-        session.send("Sorry, that account number does not exist.");
+        session.send("Sorry, account number or password is incorrect.");
     }
 }
 
 // //not working
 // exports.assignAccountNumber = function getAccountInfo(accNumber, session){
-//     var url = 'http://kellycontoso.azurewebsites.net/tables/Account';
+//     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
 //     rest.getAccountInfo(url, session, accNumber, handleLastAccountResponse);
 // };
 
@@ -93,7 +96,23 @@ function handleAccountResponse(message, accNumber, session) {
 
 //Sets up a new Account
 exports.sendAccountInfo = function postAccountInfo(session, accountInfo){
-    var url = 'http://kellycontoso.azurewebsites.net/tables/Account';
+    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
     rest.postAccountInfo(url, accountInfo);
 };
 
+exports.deleteAccount = function deleteAccount(session, accNumber, accPassword){
+    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
+    rest.getAccountInfo(url, session, accNumber, accPassword, function(message, session, accNumber) {
+        var details = JSON.parse(message);
+        var pos = 0;
+        for(var i = 0; i < details.length; i++) {
+            if(details[i].accNumber == accNumber) {
+                pos = i;
+            }
+        }
+        console.log("DEBUG! " + details[pos].id);
+        rest.deleteAccount(url, session, accNumber, details[pos].id, handleDeleteResponse);
+        session.send("Account deleted successfully");
+    });
+    
+}

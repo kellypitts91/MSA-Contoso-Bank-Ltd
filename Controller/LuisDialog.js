@@ -28,21 +28,29 @@ exports.startDialog = function(bot) {
             } else {
                 next(); // Skip if we already have this info.
             }
-        }, function (session, results){
+        }, function (session, results, next){
             //checking user entered a valid number - this means they do have an account
             if(results.response) {
                 if(isNumeric(results.response)) {
-                    session.conversationData["accNumber"] = results.response;
-                    //start retrieving data here
-                    session.send("Retrieving information about account " + results.response);
-                    account.displayAccountInfo(session, results.response);
+                    session.dialogData.user = results.response;
+                    builder.Prompts.text(session, "Please enter your password");
+                    next();
                 } else {
                     //user does not have an account
-                    session.beginDialog('SetUpAccount');  
+                    if(results.response == "c") {
+                        session.beginDialog('SetUpAccount');  
+                    } else {
+                        session.send("How can I help you?");
+                    }
                 }
             } else {
                 session.beginDialog('AboutAccounts');
             }
+        }, function(session, results) {
+            session.conversationData["accNumber"] = session.dialogData.user;
+            //start retrieving data here
+            session.send("Retrieving information about account " + session.dialogData.user);
+            account.displayAccountInfo(session, session.dialogData.user, results.response);
         }
     ]).triggerAction( {
         matches: 'Account'
@@ -81,7 +89,7 @@ exports.startDialog = function(bot) {
                 //console.log("HERE! " + session.conversationData["accNumber"]);
                 //create key/value pairs with users information
                 var accountInfo = {
-                    accNumber: 3,
+                    accNumber: 4,
                     firstName: `${session.dialogData.firstName}`,
                     lastName: `${session.dialogData.lastName}`,
                     password: `${session.dialogData.password}`, //need to encrypt this <-----------------
@@ -143,6 +151,29 @@ exports.startDialog = function(bot) {
             }
         }
     ]);
+
+    bot.dialog('DeleteAccount', [
+        function(session, args, next){
+            session.dialogData.args = args || {};
+            if (!session.conversationData["accNumber"]) {
+                builder.Prompts.text(session, "Please login to delete your account.");    
+            } else {
+                next(); // Skip if we already have this info.
+            }
+        },
+        function(session, results) {
+            if(!results.response) {
+                //delete account here
+                session.send("Deleting %s account now...", session.conversationData["accNumber"]);
+                account.deleteAccount(session, session.conversationData["accNumber"]);
+            } else {
+                //need to login
+                session.beginDialog('Account');
+            }
+        }
+    ]).triggerAction({
+        matches: 'DeleteAccount'
+    });
 }
 
 function isAttachment(session) { 
