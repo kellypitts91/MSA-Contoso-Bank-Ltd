@@ -2,7 +2,8 @@ var builder = require('botbuilder');
 var isNumeric = require("isnumeric");
 var account = require("./Account");
 var about = require("./AboutAccounts");
-var acc = 1; //testing for now
+var customVision = require('./CognitiveServices');
+var intAcc = 3; //testing for now
 
 exports.startDialog = function(bot) {
 
@@ -20,6 +21,8 @@ exports.startDialog = function(bot) {
     bot.dialog('Account', [
         function(session, args, next) { 
             session.dialogData.args = args || {}; 
+            //getting all accounts at start to determine the account id
+            //account.getAllAccounts(session, session.conversationData["accNumber"]);
             if (!session.conversationData["accNumber"]) {
                 builder.Prompts.text(session, "Please enter your account number if you have one, otherwise type \'c\' to continue.");    
             } else {
@@ -49,7 +52,7 @@ exports.startDialog = function(bot) {
 
         function(session, args) {
             session.dialogData.args = args || {};
-            builder.Prompts.confirm(session, "You do not have an Account. Would you like to set up a new account?");
+            builder.Prompts.confirm(session, "Would you like to set up a new account?");
         },
         function(session, results) {
             //user wants to set up a new account, proceed to ask for set up information
@@ -73,12 +76,12 @@ exports.startDialog = function(bot) {
         }, function(session, results) {
             if(results.response) {
                 //come back to this
-                account.assignAccountNumber(session, session.conversationData["accNumber"]);
-                //session.conversationData["accNumber"] = acc;
-                console.log("HERE! " + session.conversationData["accNumber"]);
+                //account.assignAccountNumber(session, session.conversationData["accNumber"]);
+                session.conversationData["accNumber"] = intAcc;
+                //console.log("HERE! " + session.conversationData["accNumber"]);
                 //create key/value pairs with users information
                 var accountInfo = {
-                    accNumber: acc,
+                    accNumber: 3,
                     firstName: `${session.dialogData.firstName}`,
                     lastName: `${session.dialogData.lastName}`,
                     password: `${session.dialogData.password}`, //need to encrypt this <-----------------
@@ -86,8 +89,8 @@ exports.startDialog = function(bot) {
                 }
                 session.send("Setting up account for " + accountInfo.firstName + " " + accountInfo.lastName);
                 account.sendAccountInfo(session, accountInfo);
-                session.send("Account has been setup successfully. Is there anything else I can help you with?");
-                acc++; //doesn't work - need to get value then increase -- work on later
+                session.send("Account has been setup successfully. Your account number is: " + intAcc);
+                session.send("Is there anything else I can help you with?");
             } else {
                 //restart
                 session.beginDialog('SetUpAccount');  
@@ -140,4 +143,17 @@ exports.startDialog = function(bot) {
             }
         }
     ]);
+}
+
+function isAttachment(session) { 
+    var msg = session.message.text;
+    if ((session.message.attachments && session.message.attachments.length > 0) || msg.includes("http")) {
+        //call custom vision
+        customVision.retreiveMessage(session);
+
+        return true;
+    }
+    else {
+        return false;
+    }
 }

@@ -11,7 +11,6 @@ exports.getAccountInfo = function getData(url, session, accNumber, callback){
 };
 
 exports.postAccountInfo = function SendData(url, accInfo){
-    console.log(accInfo.firstName);
     var options = {
         url: url,
         method: 'POST',
