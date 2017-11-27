@@ -120,7 +120,7 @@ exports.startDialog = function(bot) {
             }
         }
     ]).triggerAction({
-        matches: /^cancel$|^goodbye$|^stop$|^end$|^bye$/i,
+        //matches: /^cancel$|^goodbye$|^stop$|^end$|^bye$/i,
         confirmPrompt: "This will cancel your setup. Are you sure?"
     });
 
@@ -249,16 +249,16 @@ exports.startDialog = function(bot) {
     });
 
     var options = {
-        "Account": {
+        "Account Balance": {
             Description: "I can show you your account balance"
         },
-        "About": {
+        "About Different Accounts": {
             Description: "Information about the accounts available."
         },
-        "Delete": {
+        "Delete your account": {
             Description: "I can delete an account for you"
         },
-        "Location": {
+        "Branch Locations": {
             Description: "Branch location and contact details"
         },
         
@@ -275,16 +275,16 @@ exports.startDialog = function(bot) {
             var response = options[results.response.entity];
             
             switch(results.response.entity) {
-                case "Account":
+                case "Account Balance":
                     session.beginDialog('Account');
                     break;
-                case "About":
+                case "About Different Accounts":
                     session.beginDialog('AboutAccount');
                     break;
-                case "Delete":
+                case "Delete your account":
                     session.beginDialog('DeleteAccount');
                     break;
-                case "Location":
+                case "Branch Locations":
                     session.beginDialog('Location');
                     break;
                 default:
