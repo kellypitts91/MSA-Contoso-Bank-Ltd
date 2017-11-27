@@ -1,5 +1,6 @@
 var rest = require('../API/RestClient');
 var builder = require('botbuilder');
+var first = true;
 
 // exports.getAllAccounts = function getAllAccounts(accNumber, session) {
 //     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
@@ -28,15 +29,22 @@ exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPass
 function handleAccountResponse(message, session, accNumber, accPassword) {
     console.log("num = " + accNumber);
     console.log("pass = " + accPassword);
-    console.log("session = " + session);
     //message = tuple in database
     var details = JSON.parse(message);
     var found = false;
     var pos = 0;
     console.log(details);
     //going through all tuples in the database to find the correct account number
+    //checks password first time only
     for(var i = 0; i < details.length; i++) {
-        if(details[i].accNumber == accNumber && details[i].password == accPassword) {
+        if(details[i].accNumber == accNumber && details[i].password == accPassword && first) {
+            found = true;
+            pos = i;
+            first = false;
+            break;
+        //checking account number only second time
+        //so don't need to get password again
+        } else if(details[i].accNumber == accNumber && !first) {
             found = true;
             pos = i;
             break;
@@ -104,15 +112,22 @@ exports.deleteAccount = function deleteAccount(session, accNumber, accPassword){
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
     rest.getAccountInfo(url, session, accNumber, accPassword, function(message, session, accNumber) {
         var details = JSON.parse(message);
-        var pos = 0;
+        var pos = -1;
+        //checking account numbers match and gets the position of the matching account number
         for(var i = 0; i < details.length; i++) {
             if(details[i].accNumber == accNumber) {
                 pos = i;
+                break;
             }
         }
-        console.log("DEBUG! " + details[pos].id);
-        rest.deleteAccount(url, session, accNumber, details[pos].id, handleDeleteResponse);
-        session.send("Account deleted successfully");
+
+        //checking the account number has been found
+        if(!pos == -1) {
+            rest.deleteAccount(url, session, accNumber, details[pos].id, handleDeleteResponse);
+            session.send("Account deleted successfully");
+        } else {
+            session.send("Sorry, could not find an account with account #" + accNumber);
+        }
     });
     
 }
