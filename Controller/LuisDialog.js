@@ -14,7 +14,7 @@ exports.startDialog = function(bot) {
     bot.recognizer(recognizer);
 
     bot.dialog('WelcomeIntent', 
-        function (session) {
+        function(session) {
             session.send("Hello, welcome to Contoso Bank Ltd. How can I help you today?");
         }).triggerAction( {
             matches: 'WelcomeIntent'
@@ -25,14 +25,14 @@ exports.startDialog = function(bot) {
             session.dialogData.args = args || {}; 
             //getting all accounts at start to determine the account id
             //account.getAllAccounts(session, session.conversationData["accNumber"]);
-            if(!isAttachment(session)) {
+            if(!this.isAttachment(session)) {
                 if (!session.conversationData["accNumber"]) {
                     builder.Prompts.text(session, "Please enter your account number if you have one, otherwise type \'c\' to continue.");    
                 } else {
                     next(); // Skip if we already have this info.
                 }
             }
-        }, function (session, results, next){
+        }, function(session, results, next){
             //checking user entered a valid number - this means they do have an account
             if(results.response) {
                 if(isNumeric(results.response)) {
@@ -64,7 +64,7 @@ exports.startDialog = function(bot) {
 
         function(session, args, next) {
             session.dialogData.args = args || {};
-            if(!isAttachment(session)) {
+            if(!this.isAttachment(session)) {
                 builder.Prompts.confirm(session, "Would you like to set up a new account?");
                 next();
             }
@@ -146,7 +146,7 @@ exports.startDialog = function(bot) {
         function(session, args, next) {
             session.dialogData.args = args || {};
             //procceed to ask what they would like to know about accounts
-            if(!isAttachment(session)) {
+            if(!this.isAttachment(session)) {
                 builder.Prompts.choice(session, "What would you like to know about Accounts?", accountChoice);
                 next();
             }
@@ -180,7 +180,7 @@ exports.startDialog = function(bot) {
     bot.dialog('DeleteAccount', [
         function(session, args, next){
             session.dialogData.args = args || {};
-            if(!isAttachment(session)) {
+            if(!this.isAttachment(session)) {
                 if (!session.conversationData["accNumber"]) {
                     builder.Prompts.text(session, "Please login to delete your account.");    
                 } else {
@@ -267,7 +267,7 @@ exports.startDialog = function(bot) {
     bot.dialog('Help', [
         function(session, args) {
             session.dialogData.args = args || {};
-            if(!isAttachment(session)) {
+            if(!this.isAttachment(session)) {
                 session.send("I am here to help you. I can get you information on the following areas.");
                 builder.Prompts.choice(session, "Choose from the following options for more information", options);
             }
@@ -307,7 +307,7 @@ exports.startDialog = function(bot) {
     });
 }
 
-function isAttachment(session) { 
+module.exports = function isAttachment(session) { 
     var msg = session.message.text;
     if ((session.message.attachments && session.message.attachments.length > 0) || msg.includes("http")) {
         //call custom vision
