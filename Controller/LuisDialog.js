@@ -4,6 +4,7 @@ var account = require('./Account');
 var about = require('./AboutAccount');
 var customVision = require('./CognitiveServices');
 var locat = require('./Location');
+var hash = require('./HashPassword');
 var fx = require('../API/ForexAPI');
 var intAcc = 3; //testing for now
 var helpMessage = "Is there anything else I can help you with?";
@@ -99,12 +100,14 @@ exports.startDialog = function (bot) {
                 //account.assignAccountNumber(session, session.conversationData["accNumber"]);
                 session.conversationData["accNumber"] = intAcc;
                 //console.log("HERE! " + session.conversationData["accNumber"]);
+                var hashSalt = hash.hashPassword(session.dialogData.password);
                 //create key/value pairs with users information
                 var accountInfo = {
                     accNumber: 4,                                   //need a way to increment account number
                     firstName: `${session.dialogData.firstName}`,
                     lastName: `${session.dialogData.lastName}`,
-                    password: `${session.dialogData.password}`,     //need to encrypt this <-----------------
+                    password: hashSalt.password,     //need to encrypt this <-----------------
+                    salt: hashSalt.salt,
                     balance: 0
                 }
                 session.send("Setting up account for " + accountInfo.firstName + " " + accountInfo.lastName);
@@ -253,6 +256,9 @@ exports.startDialog = function (bot) {
         "Account Balance": {
             Description: "I can show you your account balance"
         },
+        "Set up a new account": {
+            Description: "I can show you your account balance"
+        },
         "About Different Accounts": {
             Description: "Information about the accounts available."
         },
@@ -305,6 +311,9 @@ exports.startDialog = function (bot) {
             switch (results.response.entity) {
                 case "Account Balance":
                     session.beginDialog('Account');
+                    break;
+                case "Set up a new account":
+                    session.beginDialog('SetUpAccount');
                     break;
                 case "About Different Accounts":
                     session.beginDialog('AboutAccount');

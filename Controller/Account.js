@@ -1,4 +1,5 @@
 var rest = require('../API/RestClient');
+var hash = require('./HashPassword');
 var builder = require('botbuilder');
 var first = true;
 
@@ -27,8 +28,6 @@ exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPass
 };
 
 function handleAccountResponse(message, session, accNumber, accPassword) {
-    console.log("num = " + accNumber);
-    console.log("pass = " + accPassword);
     //message = tuple in database
     var details = JSON.parse(message);
     var found = false;
@@ -37,11 +36,17 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
     //going through all tuples in the database to find the correct account number
     //checks password first time only
     for (var i = 0; i < details.length; i++) {
-        if (details[i].accNumber == accNumber && details[i].password == accPassword && first) {
-            found = true;
-            pos = i;
-            first = false;
-            break;
+        if (details[i].accNumber == accNumber) {
+            //getting hash and salt for password
+            var storedPasswordHash = details[i].password;
+            var enteredPasswordHash = hash.hashPassword(accPassword, details[i].salt).password; //hashing entered password with stored salt
+            if(storedPasswordHash == enteredPasswordHash && first) {
+                found = true;
+                pos = i;
+                first = false;
+                break;
+            }
+
             //checking account number only second time
             //so don't need to get password again
         } else if (details[i].accNumber == accNumber && !first) {
