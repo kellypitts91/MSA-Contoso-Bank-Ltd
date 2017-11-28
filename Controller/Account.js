@@ -21,7 +21,7 @@ var first = true;
 // }
 
 //displays bank information in a card
-exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPassword){
+exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPassword) {
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
     rest.getAccountInfo(url, session, accNumber, accPassword, handleAccountResponse);
 };
@@ -36,21 +36,21 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
     console.log(details);
     //going through all tuples in the database to find the correct account number
     //checks password first time only
-    for(var i = 0; i < details.length; i++) {
-        if(details[i].accNumber == accNumber && details[i].password == accPassword && first) {
+    for (var i = 0; i < details.length; i++) {
+        if (details[i].accNumber == accNumber && details[i].password == accPassword && first) {
             found = true;
             pos = i;
             first = false;
             break;
-        //checking account number only second time
-        //so don't need to get password again
-        } else if(details[i].accNumber == accNumber && !first) {
+            //checking account number only second time
+            //so don't need to get password again
+        } else if (details[i].accNumber == accNumber && !first) {
             found = true;
             pos = i;
             break;
         }
     }
-    if(found) {
+    if (found) {
         //creates a new adaptive card to display the account information to the user
         session.send(new builder.Message(session).addAttachment({
             contentType: "application/vnd.microsoft.card.adaptive",
@@ -70,7 +70,7 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
                             {
                                 "type": "TextBlock",
                                 "text": "Name: " + details[pos].firstName + " " + details[pos].lastName //displays the users name
-                            }, 
+                            },
                             {
                                 "type": "TextBlock",
                                 "text": "Account Balance: " + details[pos].balance //displays the users balance
@@ -103,31 +103,31 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
 // }
 
 //Sets up a new Account
-exports.sendAccountInfo = function postAccountInfo(session, accountInfo){
+exports.sendAccountInfo = function postAccountInfo(session, accountInfo) {
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
     rest.postAccountInfo(url, accountInfo);
 };
 
-exports.deleteAccount = function deleteAccount(session, accNumber, accPassword){
+exports.deleteAccount = function deleteAccount(session, accNumber, accPassword) {
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
-    rest.getAccountInfo(url, session, accNumber, accPassword, function(message, session, accNumber) {
+    rest.getAccountInfo(url, session, accNumber, accPassword, function (message, session, accNumber) {
         var details = JSON.parse(message);
         var pos = -1;
         //checking account numbers match and gets the position of the matching account number
-        for(var i = 0; i < details.length; i++) {
-            if(details[i].accNumber == accNumber) {
+        for (var i = 0; i < details.length; i++) {
+            if (details[i].accNumber == accNumber) {
                 pos = i;
                 break;
             }
         }
 
         //checking the account number has been found
-        if(!pos == -1) {
+        if (!pos == -1) {
             rest.deleteAccount(url, session, accNumber, details[pos].id, handleDeleteResponse);
             session.send("Account deleted successfully");
         } else {
             session.send("Sorry, could not find an account with account #" + accNumber);
         }
     });
-    
+
 }

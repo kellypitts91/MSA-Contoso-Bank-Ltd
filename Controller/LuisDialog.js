@@ -4,45 +4,46 @@ var account = require('./Account');
 var about = require('./AboutAccount');
 var customVision = require('./CognitiveServices');
 var locat = require('./Location');
+var fx = require('../API/ForexAPI');
 var intAcc = 3; //testing for now
 var helpMessage = "Is there anything else I can help you with?";
 
-exports.startDialog = function(bot) {
+exports.startDialog = function (bot) {
 
     var recognizer = new builder.LuisRecognizer('https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/8590ed2a-342d-467d-81c0-81a1ed2297a6?subscription-key=41e137af8106487081a7102d6e3cc0e6&verbose=true&timezoneOffset=0&q=');
-    
+
     bot.recognizer(recognizer);
 
-    bot.dialog('WelcomeIntent', 
-        function(session) {
+    bot.dialog('WelcomeIntent',
+        function (session) {
             session.send("Hello, welcome to Contoso Bank Ltd. How can I help you today?");
-        }).triggerAction( {
+        }).triggerAction({
             matches: 'WelcomeIntent'
-    });
+        });
 
     bot.dialog('Account', [
-        function(session, args, next) { 
-            session.dialogData.args = args || {}; 
+        function (session, args, next) {
+            session.dialogData.args = args || {};
             //getting all accounts at start to determine the account id
             //account.getAllAccounts(session, session.conversationData["accNumber"]);
-            if(!this.isAttachment(session)) {
+            if (!isAttachment(session)) {
                 if (!session.conversationData["accNumber"]) {
-                    builder.Prompts.text(session, "Please enter your account number if you have one, otherwise type \'c\' to continue.");    
+                    builder.Prompts.text(session, "Please enter your account number if you have one, otherwise type \'c\' to continue.");
                 } else {
                     next(); // Skip if we already have this info.
                 }
             }
-        }, function(session, results, next){
+        }, function (session, results, next) {
             //checking user entered a valid number - this means they do have an account
-            if(results.response) {
-                if(isNumeric(results.response)) {
+            if (results.response) {
+                if (isNumeric(results.response)) {
                     session.dialogData.user = results.response;
                     builder.Prompts.text(session, "Please enter your password");
                     next();
                 } else {
                     //user does not have an account
-                    if(results.response == "c") {
-                        session.beginDialog('SetUpAccount');  
+                    if (results.response == "c") {
+                        session.beginDialog('SetUpAccount');
                     } else {
                         session.send("How can I help you?");
                     }
@@ -50,28 +51,28 @@ exports.startDialog = function(bot) {
             } else {
                 session.beginDialog('AboutAccount');
             }
-        }, function(session, results) {
+        }, function (session, results) {
             session.conversationData["accNumber"] = session.dialogData.user;
             //start retrieving data here
             session.send("Retrieving information about account " + session.dialogData.user);
             account.displayAccountInfo(session, session.dialogData.user, results.response);
         }
-    ]).triggerAction( {
+    ]).triggerAction({
         matches: 'Account'
     });
 
     bot.dialog('SetUpAccount', [
 
-        function(session, args, next) {
+        function (session, args, next) {
             session.dialogData.args = args || {};
-            if(!this.isAttachment(session)) {
+            if (!isAttachment(session)) {
                 builder.Prompts.confirm(session, "Would you like to set up a new account?");
                 next();
             }
         },
-        function(session, results, next) {
+        function (session, results, next) {
             //user wants to set up a new account, proceed to ask for set up information
-            if(results.response) {
+            if (results.response) {
                 builder.Prompts.text(session, "Please enter your first name. ");
                 next();
             } else {
@@ -79,21 +80,21 @@ exports.startDialog = function(bot) {
                 session.beginDialog('AboutAccount');
             }
         },
-        function(session, results, next) {
+        function (session, results, next) {
             session.dialogData.firstName = results.response;
             builder.Prompts.text(session, "Please enter your last name.");
             next();
-        }, function(session, results, next) {
+        }, function (session, results, next) {
             session.dialogData.lastName = results.response;
             builder.Prompts.text(session, "Please enter a password.");
             next();
-        }, function(session, results, next) {
+        }, function (session, results, next) {
             session.dialogData.password = results.response;
             var msg = `Please confirm details. First name: ${session.dialogData.firstName}, Last name: ${session.dialogData.lastName}, Password: ${session.dialogData.password}`;
             builder.Prompts.confirm(session, msg);
             next();
-        }, function(session, results) {
-            if(results.response === true) {
+        }, function (session, results) {
+            if (results.response === true) {
                 //come back to this
                 //account.assignAccountNumber(session, session.conversationData["accNumber"]);
                 session.conversationData["accNumber"] = intAcc;
@@ -110,10 +111,10 @@ exports.startDialog = function(bot) {
                 account.sendAccountInfo(session, accountInfo);
                 session.send("Account has been setup successfully. Your account number is: " + intAcc);
                 session.send(helpMessage);
-            } else if(results.response === false) {
+            } else if (results.response === false) {
                 //restart
-                if(!isAttachment(session)) {
-                    session.beginDialog('SetUpAccount');  
+                if (!isAttachment(session)) {
+                    session.beginDialog('SetUpAccount');
                 }
             } else {
                 //do nothing -- could be undefined
@@ -143,20 +144,20 @@ exports.startDialog = function(bot) {
     };
 
     bot.dialog('AboutAccount', [
-        function(session, args, next) {
+        function (session, args, next) {
             session.dialogData.args = args || {};
             //procceed to ask what they would like to know about accounts
-            if(!this.isAttachment(session)) {
+            if (!isAttachment(session)) {
                 builder.Prompts.choice(session, "What would you like to know about Accounts?", accountChoice);
                 next();
             }
-        }, function(session, results) {
+        }, function (session, results) {
             //Getting the type of account the user wants more information on
             var acc = accountChoice[results.response.entity];
-            if(results.response.entity != "None") {
+            if (results.response.entity != "None") {
                 session.send("Getting information about " + acc.Description);
             }
-            switch(results.response.entity) {
+            switch (results.response.entity) {
                 case "Balance":
                     account.displayAccountInfo(session, session.conversationData["accNumber"], session.dialogData.password);
                     break;
@@ -168,7 +169,7 @@ exports.startDialog = function(bot) {
                     break;
                 case "Savings":
                     about.getSavingsInfo(session);
-                    break; 
+                    break;
                 case "None":
                     //do nothing
                     session.send("You selected \'none\'. " + helpMessage)
@@ -178,18 +179,18 @@ exports.startDialog = function(bot) {
     ]);
 
     bot.dialog('DeleteAccount', [
-        function(session, args, next){
+        function (session, args, next) {
             session.dialogData.args = args || {};
-            if(!this.isAttachment(session)) {
+            if (!isAttachment(session)) {
                 if (!session.conversationData["accNumber"]) {
-                    builder.Prompts.text(session, "Please login to delete your account.");    
+                    builder.Prompts.text(session, "Please login to delete your account.");
                 } else {
                     next(); // Skip if we already have this info.
                 }
             }
         },
-        function(session, results) {
-            if(!results.response) {
+        function (session, results) {
+            if (!results.response) {
                 //delete account here
                 session.send("Deleting %s account now...", session.conversationData["accNumber"]);
                 account.deleteAccount(session, session.conversationData["accNumber"]);
@@ -210,14 +211,14 @@ exports.startDialog = function(bot) {
     };
 
     bot.dialog('Location', [
-        function(session, args, next) {
+        function (session, args, next) {
             session.dialogData.args = args || {};
             console.log(session.dialogData.args.intents);
             //getting location entity - either Auckland or Wellington for testing
             var location = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'location');
-            if(!isAttachment(session)) {
+            if (!isAttachment(session)) {
                 //getting location information
-                if(location) {
+                if (location) {
                     session.send("Pulling up the location details for our %s branch...", location.entity);
                     locat.findLocation(session, location.entity);
                 } else {
@@ -225,10 +226,10 @@ exports.startDialog = function(bot) {
                     next();
                 }
             }
-        }, function(session, results) {
+        }, function (session, results) {
             var details = contact[results.response.entity];
 
-            switch(results.response.entity) {
+            switch (results.response.entity) {
                 case "Auckland":
                     locat.findLocation(session, "auckland");
                     break;
@@ -261,20 +262,47 @@ exports.startDialog = function(bot) {
         "Branch Locations": {
             Description: "Branch location and contact details"
         },
-        
+        "Currancy conversion": {
+            Description: "Convert from one currency to another"
+        }
     };
 
-    bot.dialog('Help', [
+    bot.dialog('Conversion', 
         function(session, args) {
             session.dialogData.args = args || {};
-            if(!this.isAttachment(session)) {
+            console.log(session.dialogData.args.intent.entities);
+            var to = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::to currency');
+            var from = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::from currency');
+            if (!isAttachment(session)) {
+                if(to && from) {
+                    var currency = {
+                        To: to.entity,
+                        From: from.entity,
+                        Amount: 1 //have option for later on to allow user to enter an amount to convert
+                    }
+                    
+                    //converting currency
+                    session.send("Converting %s to %s...", from.entity, to.entity);
+                    fx.getConversion(session, currency);
+                } else {
+                    session.send("To convert from one currency to another. Type something like \'convert from usd to nzd\'.");
+                }
+            }
+        }).triggerAction({
+            matches: 'Conversion'
+    });
+
+    bot.dialog('Help', [
+        function (session, args) {
+            session.dialogData.args = args || {};
+            if (!isAttachment(session)) {
                 session.send("I am here to help you. I can get you information on the following areas.");
                 builder.Prompts.choice(session, "Choose from the following options for more information", options);
             }
-        }, function(session, results) {
+        }, function (session, results) {
             var response = options[results.response.entity];
-            
-            switch(results.response.entity) {
+
+            switch (results.response.entity) {
                 case "Account Balance":
                     session.beginDialog('Account');
                     break;
@@ -287,6 +315,9 @@ exports.startDialog = function(bot) {
                 case "Branch Locations":
                     session.beginDialog('Location');
                     break;
+                case "Currancy conversion":
+                    session.beginDialog('Conversion');
+                    break;
                 default:
                     session.send(helpMessage);
                     break;
@@ -296,8 +327,10 @@ exports.startDialog = function(bot) {
         matches: 'Help'
     });
 
+    
+
     bot.dialog('Goodbye', [
-        function(session) {
+        function (session) {
             session.send("Thank you for choosing Contoso Bank Ltd, have a nice day.");
             //sign the user out
             session.conversationData["accNumber"] = null;
@@ -307,12 +340,11 @@ exports.startDialog = function(bot) {
     });
 }
 
-module.exports = function isAttachment(session) { 
+function isAttachment(session) {
     var msg = session.message.text;
     if ((session.message.attachments && session.message.attachments.length > 0) || msg.includes("http")) {
         //call custom vision
         customVision.retreiveMessage(session);
-
         return true;
     }
     else {

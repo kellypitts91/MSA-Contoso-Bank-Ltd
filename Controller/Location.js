@@ -3,7 +3,7 @@ var builder = require('botbuilder');
 exports.findLocation = function getLocation(session, location) {
     var street, phone;
     var email = "contoso.bank@contosobankltd.co.nz";
-    switch(location.toLowerCase()) {
+    switch (location.toLowerCase()) {
         case "auckland":
             street = "123 Queen Street, Auckland CBD";
             phone = "(09) 646 1234";
@@ -19,7 +19,7 @@ exports.findLocation = function getLocation(session, location) {
             phone = "(03) 496 8425";
             displayLocation(session, "Christchurch", street, phone, email);
             break;
-        default: 
+        default:
             session.send("Sorry, there is no bank located in " + location);
             break;
     }
@@ -45,7 +45,7 @@ function displayLocation(session, location, street, phone, email) {
                         {
                             "type": "TextBlock",
                             "text": "Street Address: " + street
-                        }, 
+                        },
                         {
                             "type": "TextBlock",
                             "text": "Phone number: " + phone

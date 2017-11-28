@@ -1,16 +1,16 @@
 var builder = require('botbuilder');
 
-exports.getChequeInfo = function(session) {
+exports.getChequeInfo = function (session) {
     var msg = "Debit account information goes here."
     displayInfo(session, "Cheque", msg);
 }
 
-exports.getCreditInfo = function(session) {
+exports.getCreditInfo = function (session) {
     var msg = "Credit card account information goes here."
     displayInfo(session, "Credit card", msg);
 }
 
-exports.getSavingsInfo = function(session) {
+exports.getSavingsInfo = function (session) {
     var msg = "Savings account information goes here."
     displayInfo(session, "Saving", msg);
 }
