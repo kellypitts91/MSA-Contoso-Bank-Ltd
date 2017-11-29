@@ -1,6 +1,8 @@
 # MSA-Contoso-Bank-Ltd
 MSA Advanced Training
 
+http://kellycontosobankweb.azurewebsites.net/
+
 Dummy data:
 
 email: kellypitts91@yahoo.com, password: 1234
