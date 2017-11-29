@@ -1,6 +1,6 @@
 var request = require('request');
 
-exports.getAccountInfo = function getData(url, session, accNumber, accPassword, callback) {
+exports.getAccountInfo = function getData(url, session, email, accPassword, callback) {
     request.get(url, {
         'headers':
             {
@@ -11,7 +11,7 @@ exports.getAccountInfo = function getData(url, session, accNumber, accPassword, 
             if (err) {
                 console.log(err);
             } else {
-                callback(body, session, accNumber, accPassword);
+                callback(body, session, email, accPassword);
             }
         });
 };
@@ -37,7 +37,7 @@ exports.postAccountInfo = function SendData(url, accInfo) {
     });
 };
 
-exports.deleteAccount = function deleteData(url, session, accNumber, id, callback) {
+exports.deleteAccount = function deleteData(url, session, email, id, callback) {
     var options = {
         url: url + "\\" + id,
         method: 'DELETE',
@@ -50,7 +50,7 @@ exports.deleteAccount = function deleteData(url, session, accNumber, id, callbac
     request(options, function (err, res, body) {
         if (!err && res.statusCode === 200) {
             console.log(body);
-            callback(body, session, accNumber);
+            callback(body, session, email);
         } else {
             console.log(err);
             console.log(res);

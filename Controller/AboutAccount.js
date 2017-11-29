@@ -41,4 +41,5 @@ function displayInfo(session, type, description) {
             ]
         }
     }));
+    session.send('Is there anything else I can help you with?');
 }

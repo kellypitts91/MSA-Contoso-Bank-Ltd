@@ -1,7 +1,6 @@
 var restify = require('restify');
 var builder = require('botbuilder');
 var luis = require('./controller/LuisDialog');
-var hash = require('./Controller/HashPassword');
 
 // Setup Restify Server
 var server = restify.createServer();
@@ -25,6 +24,3 @@ var bot = new builder.UniversalBot(connector, function (session) {
 });
 
 luis.startDialog(bot);
-
-// hash.hashPassword('MYPASSWORD');
-// hash.hashPassword('MYPASSWORD');

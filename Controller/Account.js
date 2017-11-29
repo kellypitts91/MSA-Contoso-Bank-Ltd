@@ -3,44 +3,27 @@ var hash = require('./HashPassword');
 var builder = require('botbuilder');
 var first = true;
 
-// exports.getAllAccounts = function getAllAccounts(accNumber, session) {
-//     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
-//     rest.getAccountInfo(url, session, accNumber, handleAllAccountResponse);
-// }
-
-// function handleAllAccountResponse(message, accNumber, session) {
-//     var details = JSON.parse(message);
-//     console.log(details);
-//     console.log(accNumber);
-//     //checking acc number has not been set yet
-//     if(!accNumber) {
-//         accNumber = 1;
-//     } else {
-//         //assigning a new acc number to increase
-//         accNumber = details[details.length-1].accNumber+1;
-//     }
-// }
-
 //displays bank information in a card
-exports.displayAccountInfo = function getAccountInfo(session, accNumber, accPassword) {
+exports.displayAccountInfo = function getAccountInfo(session, email, accPassword) {
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
-    rest.getAccountInfo(url, session, accNumber, accPassword, handleAccountResponse);
+    rest.getAccountInfo(url, session, email, accPassword, handleAccountResponse);
 };
 
-function handleAccountResponse(message, session, accNumber, accPassword) {
+function handleAccountResponse(message, session, email, accPassword) {
     //message = tuple in database
     var details = JSON.parse(message);
     var found = false;
     var pos = 0;
-    console.log(details);
+    console.log("details" + details);
+    console.log("session = " + email);
     //going through all tuples in the database to find the correct account number
     //checks password first time only
     for (var i = 0; i < details.length; i++) {
-        if (details[i].accNumber == accNumber) {
+        if (details[i].email == email) {
             //getting hash and salt for password
             var storedPasswordHash = details[i].password;
             var enteredPasswordHash = hash.hashPassword(accPassword, details[i].salt).password; //hashing entered password with stored salt
-            if(storedPasswordHash == enteredPasswordHash && first) {
+            if (storedPasswordHash == enteredPasswordHash && first) {
                 found = true;
                 pos = i;
                 first = false;
@@ -49,7 +32,7 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
 
             //checking account number only second time
             //so don't need to get password again
-        } else if (details[i].accNumber == accNumber && !first) {
+        } else if (details[i].email == email && !first) {
             found = true;
             pos = i;
             break;
@@ -69,7 +52,7 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
                         "items": [
                             {
                                 "type": "TextBlock",
-                                "text": "Account Information for: " + details[pos].accNumber, //displays the users account number
+                                "text": "Account Information for: " + details[pos].email, //displays the users account number
                                 "size": "large"
                             },
                             {
@@ -88,24 +71,9 @@ function handleAccountResponse(message, session, accNumber, accPassword) {
         session.send("Is there anything else I can help you with? Type \'Account\' again for more account options.");
     } else {
         //user not found
-        session.send("Sorry, account number or password is incorrect.");
+        session.send("Sorry, email address or password is incorrect.");
     }
 }
-
-// //not working
-// exports.assignAccountNumber = function getAccountInfo(accNumber, session){
-//     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
-//     rest.getAccountInfo(url, session, accNumber, handleLastAccountResponse);
-// };
-
-// //not working
-// function handleLastAccountResponse(message, accNumber, session) {
-//     var details = JSON.parse(message);
-//     var pos = details.length-1;
-//     console.log(details);
-//     session.conversationData["accNumber"] = details[pos].accNumber + 1;
-//     //console.log(session.conversationData["accNumber"] + " accnumber");
-// }
 
 //Sets up a new Account
 exports.sendAccountInfo = function postAccountInfo(session, accountInfo) {
@@ -113,26 +81,29 @@ exports.sendAccountInfo = function postAccountInfo(session, accountInfo) {
     rest.postAccountInfo(url, accountInfo);
 };
 
-exports.deleteAccount = function deleteAccount(session, accNumber, accPassword) {
+exports.deleteAccount = function deleteAccount(session, email, accPassword) {
     var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
-    rest.getAccountInfo(url, session, accNumber, accPassword, function (message, session, accNumber) {
+    rest.getAccountInfo(url, session, email, accPassword, function (message, session, email) {
         var details = JSON.parse(message);
         var pos = -1;
         //checking account numbers match and gets the position of the matching account number
         for (var i = 0; i < details.length; i++) {
-            if (details[i].accNumber == accNumber) {
+            if (details[i].email == email) {
                 pos = i;
                 break;
             }
         }
 
         //checking the account number has been found
-        if (!pos == -1) {
-            rest.deleteAccount(url, session, accNumber, details[pos].id, handleDeleteResponse);
-            session.send("Account deleted successfully");
+        if (pos != -1) {
+            rest.deleteAccount(url, session, email, details[pos].id, handleDeleteResponse);
         } else {
-            session.send("Sorry, could not find an account with account #" + accNumber);
+            session.send("Sorry, could not find an account with email address: " + email);
         }
     });
-
 }
+
+function handleDeleteResponse(message, session) {
+    session.send("Account deleted successfully");
+}
+
