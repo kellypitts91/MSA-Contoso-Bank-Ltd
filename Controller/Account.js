@@ -5,7 +5,7 @@ var first = true;
 
 //displays bank information in a card
 exports.displayAccountInfo = function getAccountInfo(session, email, accPassword) {
-    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
+    var url = 'http://kellycontosomobileapp.azurewebsites.net/tables/Account';
     rest.getAccountInfo(url, session, email, accPassword, handleAccountResponse);
 };
 
@@ -77,12 +77,12 @@ function handleAccountResponse(message, session, email, accPassword) {
 
 //Sets up a new Account
 exports.sendAccountInfo = function postAccountInfo(session, accountInfo) {
-    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
+    var url = 'http://kellycontosomobileapp.azurewebsites.net/tables/Account';
     rest.postAccountInfo(url, accountInfo);
 };
 
 exports.deleteAccount = function deleteAccount(session, email, accPassword) {
-    var url = 'http://kellycontosoapp.azurewebsites.net/tables/Account';
+    var url = 'http://kellycontosomobileapp.azurewebsites.net/tables/Account';
     rest.getAccountInfo(url, session, email, accPassword, function (message, session, email) {
         var details = JSON.parse(message);
         var pos = -1;

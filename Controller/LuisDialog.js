@@ -15,7 +15,9 @@ exports.startDialog = function (bot) {
 
     bot.dialog('WelcomeIntent',
         function (session) {
-            welcome.getWelcomeCard(session);
+            if (!isAttachment(session)) {
+                welcome.getWelcomeCard(session);
+            }
         }).triggerAction({
             matches: 'WelcomeIntent'
         });
@@ -236,10 +238,10 @@ exports.startDialog = function (bot) {
         function (session, args, next) {
             session.dialogData.args = args || {};
             console.log(session.dialogData.args.intents);
+            if (!isAttachment(session)) {
             //getting location entity - either Auckland or Wellington for testing
-            if(typeof session.dialogData.args.intents !== "undefined") {
-                var location = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'location');
-                if (!isAttachment(session)) {
+                if(typeof session.dialogData.args.intents !== "undefined") {
+                    var location = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'location');
                     //getting location information
                     if (location) {
                         session.send("Pulling up the location details for our %s branch...", location.entity);
@@ -297,10 +299,11 @@ exports.startDialog = function (bot) {
     bot.dialog('Conversion', 
         function(session, args) {
             session.dialogData.args = args || {};
-            console.log(session.dialogData.args.intent.entities);
-            var to = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::to currency');
-            var from = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::from currency');
+            
             if (!isAttachment(session)) {
+                console.log(session.dialogData.args.intent.entities);
+                var to = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::to currency');
+                var from = builder.EntityRecognizer.findEntity(session.dialogData.args.intent.entities, 'currency::from currency');
                 if(to && from) {
                     var currency = {
                         To: to.entity,
@@ -361,7 +364,7 @@ exports.startDialog = function (bot) {
         function (session) {
             session.send("Thank you for choosing Contoso Bank Ltd, have a nice day.");
             //sign the user out
-            session.conversationData["email"] = null;
+            session.conversationData["email"] = undefined;
         }
     ]).triggerAction({
         matches: "Goodbye"

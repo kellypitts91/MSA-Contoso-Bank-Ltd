@@ -20,7 +20,7 @@ exports.retreiveMessage = function (session) {
 function validResponse(body) {
 
     if (body && body.Predictions && body.Predictions[0].Tag) {
-        return "This image contains " + body.Predictions[0].Tag
+        return "This image contains " + body.Predictions[0].Tag;
     } else {
         console.log('Sorry, I am unsure what that picture contains, please try again!');
     }
