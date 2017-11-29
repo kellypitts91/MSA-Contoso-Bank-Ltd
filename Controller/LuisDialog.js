@@ -1,5 +1,4 @@
 var builder = require('botbuilder');
-var isNumeric = require('isnumeric');
 var account = require('./Account');
 var about = require('./AboutAccount');
 var customVision = require('./CognitiveServices');
